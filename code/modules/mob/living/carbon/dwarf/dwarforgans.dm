@@ -10,6 +10,14 @@
 	var/max_booze = 500
 	var/booze_rate = 1.5
 
+/mob/living/carbon/Stat()
+	..()
+	if(statpanel("Status"))
+		var/datum/organ/internal/dwarf/liver/vessel = get_organdatum("dwarf liver")
+		if(vessel && vessel.exists())
+			var/obj/item/organ/internal/dwarf/liver/PV = vessel.organitem
+			stat(null, "Booze Stored: [PV.storedBooze]/[PV.max_booze]")
+
 /mob/living/carbon/proc/getBooze()
 	var/datum/organ/internal/dwarf/liver/OR = get_organdatum("dwarf liver")
 	if(OR && OR.exists())
@@ -23,8 +31,9 @@
 /mob/living/carbon/proc/adjustBooze(amount)
 	var/datum/organ/internal/dwarf/liver/OR = get_organdatum("dwarf liver")
 	if(OR && OR.exists())
-		amount = max(500)
-		amount = min(0) //upper limit of max_plasma, lower limit of 0
+		var/obj/item/organ/internal/dwarf/liver/vessel = OR.organitem
+		vessel.storedBooze = max(vessel.storedBooze + amount,0)
+		vessel.storedBooze = min(vessel.storedBooze, vessel.max_booze) //upper limit of max_booze, lower limit of 0
 		return 1
 
 /datum/species/dwarf/handle_chemicals(datum/reagent/consumable/ethanol/booze, mob/living/carbon/dwarf/owner)
@@ -61,11 +70,3 @@
 	if(istype(owner, /mob/living/carbon/human))
 		var/mob/living/carbon/human/A = M
 		A.updateBoozeDisplay()
-
-/mob/living/carbon/Stat()
-	..()
-	if(statpanel("Status"))
-		var/datum/organ/internal/dwarf/liver/vessel = get_organdatum("dwarf liver")
-		if(vessel && vessel.exists())
-			var/obj/item/organ/internal/dwarf/liver/PV = vessel.organitem
-			stat(null, "Booze Stored: [PV.storedBooze]/[PV.max_booze]")
